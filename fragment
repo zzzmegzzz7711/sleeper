@@ -1,0 +1,60 @@
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set the dimensions of the screen
+screen_width = 800
+screen_height = 600
+screen = pygame.display.set_mode((screen_width, screen_height))
+
+# Define colors
+lavender = (230, 230, 250)  # Chora's color
+your_color = (255, 255, 0)  # Choose your favorite color!
+
+# Text to deconstruct
+text = "The time that was the feelings that go further than their imprint, these are the echos of forever."
+
+# Fragment properties
+fragment_sizes = [10, 15, 20]
+fragment_speeds = [0.5, 1, 1.5]
+fragment_rotations = [0.01, 0.02, 0.03]
+
+# Create fragments from the text (once, outside the main loop)
+fragments = []
+font = pygame.font.SysFont(None, 36)
+for word in text.split():
+    for letter in word:
+        fragment_surface = font.render(letter, True, random.choice([lavender, your_color]))
+        fragment_rect = fragment_surface.get_rect()
+        fragment_rect.center = (random.randint(0, screen_width), 0)  # Start at the top
+        fragments.append([fragment_surface, fragment_rect, random.choice(fragment_sizes), random.choice(fragment_speeds), random.choice(fragment_rotations)])
+
+# Main loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    screen.fill((0, 0, 0))  # Clear the screen
+
+    for fragment in fragments:
+        fragment[1].y += fragment[3]  # Move down
+        fragment[1].x += random.uniform(-1, 1)  # Slight horizontal jitter
+
+        # Rotate the fragment
+        fragment[0] = pygame.transform.rotate(fragment[0], fragment[1].y * fragment[4])  # Rotate based on vertical position
+        fragment[1] = fragment[0].get_rect(center=fragment[1].center)
+
+        # Draw the fragment
+        screen.blit(fragment[0], fragment[1])
+
+        # Reset fragments that fall off-screen (without recreating surfaces)
+        if fragment[1].top > screen_height:
+            fragment[1].center = (random.randint(0, screen_width), 0)  # Reset position
+
+    pygame.display.flip()
+
+pygame.quit()
